@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SITS � Student Attachment Tracking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span>&#127891; Track every day of your attachment</span>
+    <span>&#9997;&#65039; Supervisors review entries in real time</span>
+    <span>&#127970; Placements verified by Zetech University</span>
+    <span>&#128202; Live progress, not end-of-term surprises</span>
+    <span>&#128274; A secure logbook, built on Supabase</span>
+    <span>&#127891; Track every day of your attachment</span>
+    <span>&#9997;&#65039; Supervisors review entries in real time</span>
+    <span>&#127970; Placements verified by Zetech University</span>
+    <span>&#128202; Live progress, not end-of-term surprises</span>
+    <span>&#128274; A secure logbook, built on Supabase</span>
+  </div>
+  <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle light / dark mode" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);z-index:3;">
+    <span class="knob" id="theme-toggle-knob">&#9728;&#65039;</span>
+  </button>
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<div id="screen-login" class="auth-shell active">
+  <div class="auth-side">
+    <div class="auth-side-seal">VERIFIED<br/>RECORD</div>
+    <div class="auth-side-top">
+      <div class="auth-side-mark">SITS</div>
+      <div class="auth-side-tag">Internship Tracking System</div>
+    </div>
+    <p class="auth-side-quote">
+      "The logbook used to live in a backpack, half-finished, easy to lose. Now it lives where the work happens."
+      <span>Department of ICT &amp; Engineering — Zetech University</span>
+    </p>
+  </div>
+  <div class="auth-main">
+    <div class="auth-card">
+      <div class="auth-mobile-brand">
+        <div class="mobile-mark">S</div>
+        <div><div class="mobile-name">SITS</div><div class="mobile-tag">Tracking System</div></div>
+      </div>
+      <h1 class="auth-heading">Welcome back</h1>
+      <p class="auth-subheading">Sign in to pick up your attachment record where you left off.</p>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@zetech.ac.ke"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="••••••••"/>
+      </div>
+      <div id="login-error" class="alert alert-error" style="display:none;margin-bottom:14px;"></div>
+      <button class="btn-primary" onclick="handleLogin()">
+        Sign in
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+      <p class="auth-toggle">New to SITS? <button onclick="goToScreen('register')">Create an account</button></p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-register" class="auth-shell">
+  <div class="auth-side">
+    <div class="auth-side-seal">VERIFIED<br/>RECORD</div>
+    <div class="auth-side-top">
+      <div class="auth-side-mark">SITS</div>
+      <div class="auth-side-tag">Internship Tracking System</div>
+    </div>
+    <p class="auth-side-quote">
+      "Every entry you log here is a record your supervisor can act on the same day, not weeks later."
+      <span>Department of ICT &amp; Engineering — Zetech University</span>
+    </p>
+  </div>
+  <div class="auth-main">
+    <div class="auth-card">
+      <div class="auth-mobile-brand">
+        <div class="mobile-mark">S</div>
+        <div><div class="mobile-name">SITS</div><div class="mobile-tag">Tracking System</div></div>
+      </div>
+      <h1 class="auth-heading">Create your account</h1>
+      <p class="auth-subheading">Tell us who you are so we can set up the right dashboard.</p>
+      <div class="form-group">
+        <label class="form-label">I am a</label>
+        <div class="role-selector" id="role-selector">
+          <button class="role-btn selected" data-role="student" onclick="selectRole(this)" type="button"><span class="role-icon">&#127891;</span>Student</button>
+          <button class="role-btn" data-role="supervisor" onclick="selectRole(this)" type="button"><span class="role-icon">&#127970;</span>Supervisor</button>
+          <button class="role-btn" data-role="admin" onclick="selectRole(this)" type="button"><span class="role-icon">&#9881;</span>Admin</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input class="form-input" type="text" id="reg-name" placeholder="Wanjiru Kamau"/>
+        </div>
+        <div class="form-group" id="reg-admission-wrap">
+          <label class="form-label">Admission no.</label>
+          <input class="form-input" type="text" id="reg-admission" placeholder="DSE-02-0XXX"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="reg-email" placeholder="you@zetech.ac.ke"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="reg-password" placeholder="At least 8 characters"/>
+        <p class="form-hint">Use a password you don't reuse elsewhere.</p>
+      </div>
+      <div id="register-error"   class="alert alert-error"   style="display:none;margin-bottom:14px;"></div>
+      <div id="register-success" class="alert alert-success" style="display:none;margin-bottom:14px;"></div>
+      <button class="btn-primary" onclick="handleRegister()">Create account</button>
+      <p class="auth-toggle">Already have an account? <button onclick="goToScreen('login')">Sign in</button></p>
+    </div>
+  </div>
+</div>
+
+<div id="screen-app" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">S</div>
+      <div><div class="brand-name">SITS</div><div class="brand-tagline">Zetech University</div></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar">FM</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Felix Mureithi</div>
+        <span class="user-role-badge badge-student" id="user-role-badge">Student</span>
+      </div>
+    </div>
+    <div class="theme-switch-row">
+      <span class="theme-switch-label">Dark mode</span>
+      <button class="theme-toggle-light" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle light / dark mode">
+        <span class="knob" id="theme-toggle-knob-2"></span>
+      </button>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <button class="sign-out-btn" onclick="signOut()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+  <main class="main-content" id="main-content"></main>
+</div>
+
+<div class="modal-overlay" id="modal-review">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="review-modal-title">Review entry</span>
+      <button class="modal-close" onclick="closeModal('modal-review')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div id="review-entry-content" style="margin-bottom:18px;"></div>
+      <hr style="border:none;border-top:1px solid var(--slate-200);margin-bottom:16px;">
+      <div class="field">
+        <label class="label">Your feedback</label>
+        <textarea class="input" id="review-feedback" rows="4" placeholder="Write specific, constructive feedback for the student..."></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Score (out of 10)</label>
+          <input class="input" type="number" id="review-score" min="0" max="10" placeholder="e.g. 8"/>
+        </div>
+        <div class="field">
+          <label class="label">Decision</label>
+          <select class="input" id="review-decision">
+            <option value="verified">Approve &amp; verify</option>
+            <option value="revision">Request revision</option>
+          </select>
+        </div>
+      </div>
+      <div id="review-error" class="alert alert-error" style="display:none;margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-review')">Cancel</button>
+      <button class="btn btn-dark" onclick="submitReview()">Submit feedback</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-entry">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">New logbook entry</span>
+      <button class="modal-close" onclick="closeModal('modal-entry')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Date</label>
+          <input class="input" type="date" id="entry-date"/>
+        </div>
+        <div class="field">
+          <label class="label">Entry type</label>
+          <select class="input" id="entry-type">
+            <option value="daily">Daily entry</option>
+            <option value="weekly">Weekly summary</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Title</label>
+        <input class="input" type="text" id="entry-title" placeholder="e.g. Week 3 — Network configuration"/>
+      </div>
+      <div class="field">
+        <label class="label">Activities carried out</label>
+        <textarea class="input" id="entry-activities" rows="4" placeholder="Describe the tasks and activities you did today..."></textarea>
+      </div>
+      <div class="field">
+        <label class="label">Key learning points</label>
+        <textarea class="input" id="entry-learning" rows="3" placeholder="What did you learn?"></textarea>
+      </div>
+      <div class="field">
+        <label class="label">Challenges faced</label>
+        <textarea class="input" id="entry-challenges" rows="2" placeholder="Any difficulties and how you handled them..."></textarea>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="label">Evidence (optional)</label>
+        <div class="file-drop" onclick="document.getElementById('entry-attachments').click()">
+          &#128206; Click to attach photos or PDFs of your work
+        </div>
+        <input type="file" id="entry-attachments" accept="image/*,.pdf" multiple style="display:none;" onchange="handleAttachmentPick(this)"/>
+        <div id="entry-attachments-preview" style="margin-top:8px;"></div>
+      </div>
+      <div id="entry-error" class="alert alert-error" style="display:none;margin-top:12px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-entry')">Cancel</button>
+      <button class="btn btn-dark" onclick="submitEntry()">Submit entry</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-placement">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Assign placement</span>
+      <button class="modal-close" onclick="closeModal('modal-placement')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="label">Student</label>
+        <select class="input" id="pl-student">
+          <option value="felix">Felix Mureithi (DSE-02-0077)</option>
+          <option value="grace">Grace Wanjiku (DSE-02-0043)</option>
+          <option value="kevin">Kevin Otieno (DSE-02-0061)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Organisation</label>
+        <input class="input" type="text" id="pl-org" placeholder="e.g. Safaricom PLC"/>
+      </div>
+      <div class="field">
+        <label class="label">University supervisor</label>
+        <select class="input" id="pl-uni-sup">
+          <option>Dr. Kamau — ICT Dept.</option>
+          <option>Ms. Waweru — Engineering</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Start date</label>
+          <input class="input" type="date" id="pl-start"/>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label class="label">End date</label>
+          <input class="input" type="date" id="pl-end"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-placement')">Cancel</button>
+      <button class="btn btn-dark" onclick="savePlacement()">Save placement</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-evaluation">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="eval-modal-title">Milestone evaluation</span>
+      <button class="modal-close" onclick="closeModal('modal-evaluation')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="label">Milestone</label>
+        <select class="input" id="eval-milestone">
+          <option value="midterm">Mid-term appraisal</option>
+          <option value="final">Final appraisal</option>
+        </select>
+      </div>
+      <div class="rubric-row">
+        <span class="rubric-label">Punctuality &amp; attendance</span>
+        <select class="input rubric-select" id="eval-punctuality"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Average</option><option value="2">2 — Below average</option><option value="1">1 — Poor</option></select>
+      </div>
+      <div class="rubric-row">
+        <span class="rubric-label">Technical capability</span>
+        <select class="input rubric-select" id="eval-technical"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Average</option><option value="2">2 — Below average</option><option value="1">1 — Poor</option></select>
+      </div>
+      <div class="rubric-row">
+        <span class="rubric-label">Soft skills &amp; teamwork</span>
+        <select class="input rubric-select" id="eval-softskills"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Average</option><option value="2">2 — Below average</option><option value="1">1 — Poor</option></select>
+      </div>
+      <div class="rubric-row">
+        <span class="rubric-label">Initiative &amp; reliability</span>
+        <select class="input rubric-select" id="eval-attendance"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Average</option><option value="2">2 — Below average</option><option value="1">1 — Poor</option></select>
+      </div>
+      <div class="field" style="margin-top:14px;margin-bottom:0;">
+        <label class="label">Overall comments</label>
+        <textarea class="input" id="eval-comments" rows="4" placeholder="Summarize the student's performance for this milestone..."></textarea>
+      </div>
+      <div id="eval-error" class="alert alert-error" style="display:none;margin-top:12px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-evaluation')">Cancel</button>
+      <button class="btn btn-dark" onclick="submitEvaluation()">Save evaluation</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
