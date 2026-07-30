@@ -1,14 +1,16 @@
 
 // ════════════════════════════════════════════════════════════
-// SUPABASE CONFIG — replace with your own project values
+// SUPABASE CONFIG — sourced from supabase.js (SITS namespace)
 // ════════════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://yffmpfdzrbwhuacvrhth.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_eeqbo_Q3delLSZvfXkIKiw_85mzu_Am';
-const ATTACHMENTS_BUCKET = 'entry-attachments';
-const STALE_ENTRY_DAYS = 7;      // flag a student if no entry logged in this many days
-const STALE_REVIEW_DAYS = 5;     // flag a pending entry not reviewed within this many days
+var SITS = window.SITS || {};
+var _cfg = SITS.getConfig ? SITS.getConfig() : {};
+var SUPABASE_URL = _cfg.supabaseUrl || 'https://yffmpfdzrbwhuacvrhth.supabase.co';
+var SUPABASE_ANON_KEY = _cfg.supabaseAnonKey || 'sb_publishable_eeqbo_Q3delLSZvfXkIKiw_85mzu_Am';
+var ATTACHMENTS_BUCKET = _cfg.attachmentsBucket || 'entry-attachments';
+var STALE_ENTRY_DAYS = _cfg.staleEntryDays || 7;
+var STALE_REVIEW_DAYS = _cfg.staleReviewDays || 5;
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = SITS.getSb ? SITS.getSb() : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;   // { id, name, email, role, admission }
 let activeTab   = '';
